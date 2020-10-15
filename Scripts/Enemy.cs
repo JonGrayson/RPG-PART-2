@@ -133,7 +133,7 @@ public class Enemy : MonoBehaviourPun
         }
     }
 
-    /*
+    
     [PunRPC]
     void FlashDamage()
     {
@@ -145,7 +145,6 @@ public class Enemy : MonoBehaviourPun
             sr.color = Color.white;
         }
     }
-    */
 
     void Die()
     {

@@ -36,8 +36,12 @@ public class PlayerController : MonoBehaviourPun
 
     public HeaderInfo headerInfo;
 
+    public int side;
+
     void Update()
     {
+        side = 0;
+
         if (!photonView.IsMine)
         {
             return;
@@ -47,8 +51,13 @@ public class PlayerController : MonoBehaviourPun
 
         if (Input.GetMouseButtonDown(0) && Time.time - lastAttackTime > attackRate)
         {
-            Attack();
+            AttackElucidator();
         }
+        else if(Input.GetMouseButtonDown(1) && Time.time - lastAttackTime > attackRate)
+        {
+            AttackDarkRepulsor();
+        }
+
 
         float mouseX = (Screen.width / 2) - Input.mousePosition.x;
 
@@ -57,14 +66,13 @@ public class PlayerController : MonoBehaviourPun
         {
             //Going to replace to that it will trigger a certain weapon if clicked on that side
             //Elucidator
-            weaponAnimElucidator.transform.parent.localScale = new Vector3(1, 1, 1);
-            
+            //weaponAnimElucidator.transform.parent.localScale = new Vector3(1, 1, 1);
         }
 
         else
         {
             //Dark Repulsor
-            weaponAnimElucidator.transform.parent.localScale = new Vector3(-1, 1, 1);
+            //weaponAnimElucidator.transform.parent.localScale = new Vector3(-1, 1, 1);
         }
     }
 
@@ -79,7 +87,7 @@ public class PlayerController : MonoBehaviourPun
     }
 
     // melee attacks towards the mouse
-    void Attack()
+    void AttackElucidator()
     {
         lastAttackTime = Time.time;
         // calculate the direction
@@ -100,7 +108,35 @@ public class PlayerController : MonoBehaviourPun
         }
 
         // play attack animation
-        weaponAnimElucidator.SetTrigger("Attack");
+            weaponAnimElucidator.SetTrigger("Attack");
+
+            //weaponAnimDarkRepulsor.SetTrigger("Attack");
+    }
+
+    void AttackDarkRepulsor()
+    {
+        lastAttackTime = Time.time;
+        // calculate the direction
+
+        Vector3 dir = (Input.mousePosition - Camera.main.WorldToScreenPoint(transform.position)).normalized * 1.5f;
+
+        // shoot a raycast in the direction
+        RaycastHit2D hit = Physics2D.Raycast(transform.position + dir, dir, attackRange);
+        Debug.DrawRay(transform.position + dir, dir * attackRange, Color.cyan, duration);
+
+        // did we hit an enemy?
+        if (hit.collider != null && hit.collider.gameObject.CompareTag("Enemy"))
+        {
+            Debug.Log("Hit");
+            // get the enemy and damage them
+            Enemy enemy = hit.collider.GetComponent<Enemy>();
+            enemy.photonView.RPC("TakeDamage", RpcTarget.MasterClient, damage);
+        }
+
+        // play attack animation
+        //weaponAnimElucidator.SetTrigger("Attack");
+
+        weaponAnimDarkRepulsor.SetTrigger("Attack");
     }
 
     [PunRPC]
